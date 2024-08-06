@@ -1020,7 +1020,7 @@ void CodeGenPGO::assignRegionCounters(GlobalDecl GD, llvm::Function *Fn) {
       D->hasAttr<CUDAGlobalAttr>())
     return;
 
-  bool InstrumentRegions = CGM.getCodeGenOpts().hasProfileClangInstr();
+  bool InstrumentRegions = CGM.getCodeGenOpts().hasProfileClangInstr() || CGM.getLangOpts().CUDAIsDevice;
   llvm::IndexedInstrProfReader *PGOReader = CGM.getPGOReader();
   if (!InstrumentRegions && !PGOReader)
     return;

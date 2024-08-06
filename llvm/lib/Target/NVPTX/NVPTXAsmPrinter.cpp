@@ -128,18 +128,26 @@ VisitGlobalVariableForEmission(const GlobalVariable *GV,
   // Have we already visited this one?
   if (Visited.count(GV))
     return;
+  
+  llvm::errs() << "curr GV: " << GV->getName().str() << "\n";
 
   // Do we have a circular dependency?
-  if (!Visiting.insert(GV).second)
+  if (!Visiting.insert(GV).second){
+    // @xcgao: FIXME: is it right to just skip?
+      return;
     report_fatal_error("Circular dependency found in global variable set");
+  }
 
   // Make sure we visit all dependents first
   DenseSet<const GlobalVariable *> Others;
   for (unsigned i = 0, e = GV->getNumOperands(); i != e; ++i)
     DiscoverDependentGlobals(GV->getOperand(i), Others);
 
-  for (const GlobalVariable *GV : Others)
+  llvm::errs() << "To VisitGlobalVariableForEmission:\n";
+  for (const GlobalVariable *GV : Others){
+    llvm::errs() << "\t " << GV->getName().str() << "\n";
     VisitGlobalVariableForEmission(GV, Order, Visited, Visiting);
+  }
 
   // Now we can visit ourself
   Order.push_back(GV);
@@ -1207,6 +1215,7 @@ void NVPTXAsmPrinter::printModuleLevelGV(const GlobalVariable *GVar,
         const Constant *Initializer = GVar->getInitializer();
         if (!isa<UndefValue>(Initializer) && !Initializer->isNullValue()) {
           AggBuffer aggBuffer(ElementSize, *this);
+          llvm::errs() << "temp GVar to AggregateConstant: " << GVar->getName().str() << "\n";
           bufferAggregateConstant(Initializer, &aggBuffer);
           if (aggBuffer.numSymbols()) {
             unsigned int ptrSize = MAI->getCodePointerSize();
@@ -1858,6 +1867,7 @@ void NVPTXAsmPrinter::bufferLEByte(const Constant *CPV, int Bytes,
         Val.extractBitsAsZExtValue(LastByteBits, LastBytePosition);
     AggBuffer->addBytes(Buf.data(), NumBytes, Bytes);
   };
+  CPV->getType()->dump();
 
   switch (CPV->getType()->getTypeID()) {
   case Type::IntegerTyID:

@@ -837,6 +837,17 @@ void CudaToolChain::addClangTargetOptions(
           DeviceOffloadingKind == Action::OFK_Cuda) &&
          "Only OpenMP or CUDA offloading kinds are supported for NVIDIA GPUs.");
 
+  // @xcgao: add codeGenOpt of profile-instr-generate & coverage-mapping
+  llvm::errs() << "here!!!!!!!!!!!!!\n";
+  // llvm::errs() << "C.getInputArgs(): "; DriverArgs.dump();
+  if(DriverArgs.hasArg(options::OPT_fcoverage_mapping) && DriverArgs.hasArg(options::OPT_fprofile_instr_generate)){
+    llvm::ErrorOr<std::string> CWD =
+                 getVFS().getCurrentWorkingDirectory();
+    CC1Args.append(
+        {"-fcoverage-mapping", "-fprofile-instrument=clang", DriverArgs.MakeArgString("-fcoverage-compilation-dir=" + *CWD)});
+  }
+  
+
   if (DeviceOffloadingKind == Action::OFK_Cuda) {
     CC1Args.append(
         {"-fcuda-is-device", "-mllvm", "-enable-memcpyopt-without-libcalls"});

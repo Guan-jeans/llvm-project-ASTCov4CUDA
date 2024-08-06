@@ -2291,6 +2291,8 @@ bool AsmPrinter::doFinalization(Module &M) {
   // where the got equivalent shows up before its use.
   computeGlobalGOTEquivs(M);
 
+  llvm::errs() << "here emit global!\n";
+
   // Emit global variables.
   for (const auto &G : M.globals())
     emitGlobalVariable(&G);

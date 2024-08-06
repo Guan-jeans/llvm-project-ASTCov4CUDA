@@ -1632,6 +1632,10 @@ public:
       auto AL = ApplyDebugLocation::CreateArtificial(*this);
       PGO.emitCounterSetOrIncrement(Builder, S, StepV);
     }
+    // @xcgao: to check in which condition emitCounterSetOrIncrement is forbidenned
+    // else{
+    //   llvm::errs() << "forbidenned!!!\n";
+    // }
     PGO.setCurrentStmt(S);
   }
 

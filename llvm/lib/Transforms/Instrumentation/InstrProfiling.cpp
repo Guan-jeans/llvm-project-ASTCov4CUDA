@@ -1802,6 +1802,13 @@ void InstrLowerer::createDataVariable(InstrProfCntrInstBase *Inc) {
 
   uint64_t NumBitmapBytes = PD.NumBitmapBytes;
 
+  // @xcgao: skip when CUDA device
+  // FIXME: is it right?
+  errs() << "getTargetTriple: " << M.getTargetTriple() << "\n";
+  if(M.getTargetTriple().find("cuda")){
+    return;
+  }
+
   // Create data variable.
   auto *IntPtrTy = M.getDataLayout().getIntPtrType(M.getContext());
   auto *Int16Ty = Type::getInt16Ty(Ctx);

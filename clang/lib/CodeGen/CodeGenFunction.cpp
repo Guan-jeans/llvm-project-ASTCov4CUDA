@@ -1323,6 +1323,16 @@ void CodeGenFunction::StartFunction(GlobalDecl GD, QualType RetTy,
 }
 
 void CodeGenFunction::EmitFunctionBody(const Stmt *Body) {
+  // @xcgao: print to look out the function attr of CUDA
+  // if(CurFn->hasFnAttribute(llvm::Attribute::NoProfile)){
+  //   llvm::errs() << CurFn->getName().str() << " has Attr::NoProfile!\n";
+  // }else if(CurFn->hasFnAttribute(llvm::Attribute::SkipProfile)){
+  //   llvm::errs() << CurFn->getName().str() << " has Attr::SkipProfile!\n";
+  // }else if(!CGM.getCodeGenOpts().hasProfileClangInstr()){
+  //   llvm::errs() << CurFn->getName().str() << " donot has ProfileClangInstr!\n";
+  // }else{
+  //   llvm::errs() << CurFn->getName().str() << " pass\n";
+  // }
   incrementProfileCounter(Body);
   maybeCreateMCDCCondBitmap();
   if (const CompoundStmt *S = dyn_cast<CompoundStmt>(Body))
@@ -1552,6 +1562,7 @@ void CodeGenFunction::GenerateCode(GlobalDecl GD, llvm::Function *Fn,
     // copy-constructors.
     emitImplicitAssignmentOperatorBody(Args);
   } else if (Body) {
+    // llvm::errs() << "current fn: " << CurFn->getName().str() << "\n"; // @xcgao
     EmitFunctionBody(Body);
   } else
     llvm_unreachable("no definition for emitted function");
